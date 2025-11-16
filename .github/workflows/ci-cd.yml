@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  build-and-test:
+  build-and-docker:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,19 +28,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Build with Maven
+      - name: Build JARs
         run: mvn clean install -DskipTests
 
-  #      - name: Run tests
-  #        run: mvn test
-
-  docker-build:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      #      - name: Run tests
+      #        run: mvn test
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -54,7 +46,7 @@ jobs:
       - name: Build and push Docker images
         run: |
           for service in api-gateway product-service order-service inventory-service notification-service discovery-service; do
-            docker build -t ${{ secrets.DOCKER_USERNAME }}/$service:latest \
-            --build-arg JAR_FILE=$service-0.0.1-SNAPSHOT.jar ./$service
+            echo "Building and pushing $service..."
+            docker build -t ${{ secrets.DOCKER_USERNAME }}/$service:latest ./$service
             docker push ${{ secrets.DOCKER_USERNAME }}/$service:latest
           done
