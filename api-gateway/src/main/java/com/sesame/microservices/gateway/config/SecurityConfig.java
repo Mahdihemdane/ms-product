@@ -14,17 +14,32 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
-    private final String[] freeResourceUrls = {"/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
-            "/swagger-resources/**", "/api-docs/**", "/aggregate/**", "/actuator/prometheus"};
+    private final String[] freeResourceUrls = {
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/swagger-resources/**",
+            "/api-docs/**",
+            "/aggregate/**",
+            "/actuator/**"
+    };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity.authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(freeResourceUrls)
-                        .permitAll()
-                        .anyRequest().authenticated())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        return httpSecurity
+                // Autoriser CORS et désactiver CSRF pour POST/PUT depuis navigateur
+                .cors(Customizer.withDefaults())
+                .csrf(csrf -> csrf.disable())
+
+                // Gestion des URLs publiques
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(freeResourceUrls).permitAll()
+                        .anyRequest().authenticated()
+                )
+
+                // OAuth2 JWT
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+
                 .build();
     }
 
@@ -33,6 +48,9 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.applyPermitDefaultValues();
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
+        configuration.addAllowedOriginPattern("*"); // Pour tests depuis n’importe quel domaine
+        configuration.addAllowedHeader("*");        // Autoriser tous les headers
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

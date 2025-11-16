@@ -1,30 +1,15 @@
 package com.sesame.microservices.order.controller;
 
-import com.sesame.microservices.order.service.OrderService;
-import com.sesame.microservices.order.dto.OrderRequest;
-import groovy.util.logging.Slf4j;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.concurrent.CompletableFuture;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/order")
-@RequiredArgsConstructor
-@Slf4j
+@RequestMapping("/api/orders")
 public class OrderController {
 
-    private final OrderService orderService;
-
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public String placeOrder(@RequestBody OrderRequest orderRequest) {
-        orderService.placeOrder(orderRequest);
-        return "Order Placed Successfully";
-    }
-
-    public CompletableFuture<String> fallbackMethod(OrderRequest orderRequest, RuntimeException runtimeException) {
-        return CompletableFuture.supplyAsync(() -> "Oops! Something went wrong, please order after some time!");
+    @GetMapping("/test")
+    public String test() {
+        return "Order service is running";
     }
 }
