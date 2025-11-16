@@ -1,4 +1,4 @@
-package java.com.sesame.microservices.inventory;
+package com.sesame.microservices.inventory;
 
 import com.sesame.microservices.inventory.InventoryServiceApplication;
 import org.springframework.boot.SpringApplication;
